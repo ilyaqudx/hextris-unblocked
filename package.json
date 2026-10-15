@@ -1,0 +1,14 @@
+{
+  "name": "hextris-unblocked",
+  "version": "1.0.0",
+  "description": "Hextris Unblocked - Play Free Online Hexagonal Tetris Game in Browser",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.2.0"
+  }
+}
