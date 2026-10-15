@@ -99,21 +99,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  const startOverlayTitle = document.getElementById('startOverlayTitle');
+  const startOverlaySubtitle = document.getElementById('startOverlaySubtitle');
+  const startBtnText = document.getElementById('startBtnText');
+
+  function updateModeUI(mode) {
+    if (mode === 'daily') {
+      dailyModeBtn.classList.add('active');
+      classicModeBtn.classList.remove('active');
+      if (startOverlayTitle) startOverlayTitle.textContent = 'DAILY CHALLENGE';
+      if (startOverlaySubtitle) startOverlaySubtitle.textContent = `Today's synchronized puzzle seed: #${game.dailySeed}. Everyone gets the exact same block sequence today!`;
+      if (startBtnText) startBtnText.textContent = 'PLAY DAILY CHALLENGE';
+    } else {
+      classicModeBtn.classList.add('active');
+      dailyModeBtn.classList.remove('active');
+      if (startOverlayTitle) startOverlayTitle.textContent = 'HEXTRIS UNBLOCKED';
+      if (startOverlaySubtitle) startOverlaySubtitle.textContent = 'Rotate the hexagon to align falling blocks. Match 3+ colors to eliminate them and score big combos!';
+      if (startBtnText) startBtnText.textContent = 'PLAY NOW';
+    }
+  }
+
   // Mode Selection: Classic vs Daily Challenge (哥飞's Retention Strategy)
   classicModeBtn.addEventListener('click', () => {
-    classicModeBtn.classList.add('active');
-    dailyModeBtn.classList.remove('active');
     game.setMode('classic');
+    updateModeUI('classic');
+    game.resetToIdle();
     highScoreVal.textContent = game.getRelevantHighScore().toLocaleString();
-    game.start();
   });
 
   dailyModeBtn.addEventListener('click', () => {
-    dailyModeBtn.classList.add('active');
-    classicModeBtn.classList.remove('active');
     game.setMode('daily');
+    updateModeUI('daily');
+    game.resetToIdle();
     highScoreVal.textContent = game.getRelevantHighScore().toLocaleString();
-    game.start();
   });
 
   // Mobile Touch Controls

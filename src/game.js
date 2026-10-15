@@ -288,6 +288,36 @@ export class HextrisGame {
     }
   }
 
+  resetToIdle() {
+    this.state = 'idle';
+    this.score = 0;
+    this.lanes = [[], [], [], [], [], []];
+    this.fallingBlocks = [];
+    this.particles = [];
+    this.floatingTexts = [];
+    this.rotation = 0;
+    this.targetRotation = 0;
+    this.rotIndex = 0;
+    this.comboMultiplier = 1;
+    this.comboTimer = 0;
+    this.difficulty = 1;
+    this.spawnTimer = 0;
+
+    if (this.gameMode === 'daily') {
+      this.prngState = this.dailySeed;
+    }
+
+    if (this.animId) {
+      cancelAnimationFrame(this.animId);
+      this.animId = null;
+    }
+
+    this.options.onStateChange(this.state);
+    this.options.onScoreUpdate(this.score, this.getRelevantHighScore());
+    this.options.onComboUpdate(1, 0);
+    this.draw();
+  }
+
   start() {
     this.initAudio();
     this.score = 0;
