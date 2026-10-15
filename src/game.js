@@ -1,5 +1,5 @@
 // Hextris Unblocked Game Engine (Pure Canvas + Web Audio API)
-// High-performance, zero external runtime dependency, mobile-touch enabled.
+// Mathematically aligned hexagonal geometry, responsive touch & keyboard controls.
 
 export class HextrisGame {
   constructor(canvas, options = {}) {
@@ -27,7 +27,7 @@ export class HextrisGame {
     this.sides = 6;
     this.hexRadius = 65;
     this.blockHeight = 22;
-    this.dangerRingRadius = 240;
+    this.dangerRingRadius = 230;
 
     // Mode: 'classic' or 'daily'
     this.gameMode = 'classic';
@@ -69,6 +69,7 @@ export class HextrisGame {
 
     this.setupDisplay();
     this.bindEvents();
+    this.draw(); // Initial render for idle screen
   }
 
   getTodaySeed() {
@@ -164,15 +165,14 @@ export class HextrisGame {
   }
 
   playRotateSound() {
-    this.playTone(320, 'triangle', 0.06, 0.08);
+    this.playTone(340, 'triangle', 0.05, 0.07);
   }
 
   playLandSound() {
-    this.playTone(180, 'sine', 0.08, 0.12);
+    this.playTone(190, 'sine', 0.07, 0.10);
   }
 
   playMatchSound(combo) {
-    // Musical chords based on combo multiplier
     const chords = [
       [523.25, 659.25], // C5, E5
       [659.25, 783.99], // E5, G5
@@ -182,14 +182,14 @@ export class HextrisGame {
     ];
     const notes = chords[Math.min(combo - 1, chords.length - 1)];
     notes.forEach((f, idx) => {
-      setTimeout(() => this.playTone(f, 'sine', 0.22, 0.15), idx * 45);
+      setTimeout(() => this.playTone(f, 'sine', 0.2, 0.14), idx * 45);
     });
   }
 
   playGameOverSound() {
     const freqs = [350, 290, 220, 160];
     freqs.forEach((f, i) => {
-      setTimeout(() => this.playTone(f, 'sawtooth', 0.25, 0.18), i * 110);
+      setTimeout(() => this.playTone(f, 'sawtooth', 0.22, 0.16), i * 100);
     });
   }
 
@@ -205,22 +205,25 @@ export class HextrisGame {
     this.canvas.style.width = `${size}px`;
     this.canvas.style.height = `${size}px`;
 
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.ctx.scale(dpr, dpr);
 
     // Scale game metrics based on canvas dimensions
     const scale = size / 600;
-    this.hexRadius = 55 * scale;
-    this.blockHeight = 20 * scale;
-    this.dangerRingRadius = 220 * scale;
+    this.hexRadius = 60 * scale;
+    this.blockHeight = 22 * scale;
+    this.dangerRingRadius = (this.hexRadius + 6 * this.blockHeight);
   }
 
   bindEvents() {
-    window.addEventListener('resize', () => this.setupDisplay());
+    window.addEventListener('resize', () => {
+      this.setupDisplay();
+      this.draw();
+    });
 
     // Keyboard bindings (Arrow keys + A/D)
     window.addEventListener('keydown', (e) => {
       if (['ArrowLeft', 'ArrowRight', 'ArrowDown', 'Space', 'KeyA', 'KeyD', 'KeyP'].includes(e.code)) {
-        // Prevent scroll on gaming keys
         if (this.state === 'playing') e.preventDefault();
       }
 
@@ -266,7 +269,6 @@ export class HextrisGame {
             this.rotateLeft();
           }
         } else {
-          // Tap left side or right side of canvas
           const rect = this.canvas.getBoundingClientRect();
           const clickX = touchEndX - rect.left;
           if (clickX < rect.width / 2) {
@@ -300,7 +302,7 @@ export class HextrisGame {
     this.comboTimer = 0;
     this.difficulty = 1;
     this.spawnTimer = 0;
-    this.spawnInterval = 130;
+    this.spawnInterval = 120;
 
     if (this.gameMode === 'daily') {
       this.prngState = this.dailySeed;
@@ -334,6 +336,7 @@ export class HextrisGame {
     return this.gameMode === 'daily' ? this.dailyHighScore : this.highScore;
   }
 
+  // Rotate Left (Counter-Clockwise)
   rotateLeft() {
     if (this.state !== 'playing') return;
     this.rotIndex = (this.rotIndex - 1 + this.sides) % this.sides;
@@ -341,6 +344,7 @@ export class HextrisGame {
     this.playRotateSound();
   }
 
+  // Rotate Right (Clockwise)
   rotateRight() {
     if (this.state !== 'playing') return;
     this.rotIndex = (this.rotIndex + 1) % this.sides;
@@ -350,7 +354,7 @@ export class HextrisGame {
 
   spawnWave() {
     const p = this.prng();
-    const speed = 1.6 + (this.difficulty / 15) * 2.8;
+    const speed = 1.6 + (this.difficulty / 15) * 2.6;
 
     if (p < 0.55) {
       // Single block
@@ -373,7 +377,7 @@ export class HextrisGame {
       this.fallingBlocks.push(this.createBlock(lane1, c, speed));
       this.fallingBlocks.push(this.createBlock(lane2, c, speed));
     } else {
-      // Ring wave with one gap (fun high-intensity wave!)
+      // Ring wave with one gap
       const gapLane = Math.floor(this.prng() * this.sides);
       const color = this.colors[Math.floor(this.prng() * this.colors.length)];
       for (let i = 0; i < this.sides; i++) {
@@ -398,12 +402,15 @@ export class HextrisGame {
   update() {
     if (this.state !== 'playing') return;
 
-    // Smooth rotation lerp
-    this.rotation += (this.targetRotation - this.rotation) * 0.35;
+    // Smooth snappy rotation lerp
+    this.rotation += (this.targetRotation - this.rotation) * 0.45;
+    if (Math.abs(this.targetRotation - this.rotation) < 0.001) {
+      this.rotation = this.targetRotation;
+    }
 
-    // Difficulty and spawning
-    this.difficulty = Math.min(30, 1 + this.score / 1500);
-    this.spawnInterval = Math.max(55, 140 - this.difficulty * 2.8);
+    // Difficulty and spawning progression
+    this.difficulty = Math.min(30, 1 + this.score / 1400);
+    this.spawnInterval = Math.max(50, 130 - this.difficulty * 2.7);
 
     this.spawnTimer++;
     if (this.spawnTimer >= this.spawnInterval) {
@@ -426,15 +433,15 @@ export class HextrisGame {
       const b = this.fallingBlocks[i];
       b.dist -= b.speed;
 
-      // Calculate which lane this block aligns with on the currently rotated hexagon
-      // Block spawns from fixed world angle `b.spawnLane * 60deg`
-      // Hexagon is rotated by `this.rotIndex * 60deg`
-      const targetLane = (b.spawnLane - this.rotIndex + this.sides * 10) % this.sides;
+      // Perfectly aligned target lane on the center hexagon:
+      // When rotIndex increases (clockwise), the lane on the hex aligned with world spawnLane S is:
+      // targetLane = (spawnLane - rotIndex + sides * 100) % sides
+      const targetLane = (b.spawnLane - this.rotIndex + this.sides * 100) % this.sides;
       const stack = this.lanes[targetLane];
       const stackTopDist = this.hexRadius + stack.length * this.blockHeight;
 
       if (b.dist <= stackTopDist) {
-        // Block settled!
+        // Block docks seamlessly!
         this.fallingBlocks.splice(i, 1);
         this.settleBlock(targetLane, b);
       }
@@ -467,7 +474,6 @@ export class HextrisGame {
     const stack = this.lanes[lane];
     stack.push({
       color: block.color,
-      flash: 1.0,
     });
 
     this.playLandSound();
@@ -497,11 +503,11 @@ export class HextrisGame {
 
       toDelete.push({ lane: l, index: idx });
 
-      // Check vertical neighbors (same lane, idx+1 and idx-1)
+      // Vertical neighbors (same lane, idx+1 and idx-1)
       if (idx + 1 < this.lanes[l].length) flood(l, idx + 1);
       if (idx - 1 >= 0) flood(l, idx - 1);
 
-      // Check horizontal neighbors (adjacent lanes at same or adjacent height)
+      // Horizontal neighbors (adjacent lanes at same height)
       const leftLane = (l - 1 + this.sides) % this.sides;
       const rightLane = (l + 1) % this.sides;
 
@@ -512,7 +518,7 @@ export class HextrisGame {
     flood(startLane, startIndex);
 
     if (toDelete.length >= 3) {
-      // Match found!
+      // Match 3+ confirmed!
       this.comboTimer = this.comboMaxTime;
       this.comboMultiplier = Math.min(10, this.comboMultiplier + 1);
       this.playMatchSound(this.comboMultiplier);
@@ -529,23 +535,22 @@ export class HextrisGame {
       this.options.onScoreUpdate(this.score, this.getRelevantHighScore());
       this.options.onComboUpdate(this.comboMultiplier, 1.0);
 
-      // Add floating score text
+      // Floating score banner
       this.floatingTexts.push({
         text: `+${points}`,
         sub: this.comboMultiplier > 1 ? `x${this.comboMultiplier} COMBO!` : '',
         x: this.width / 2,
-        y: this.height / 2 - 30,
+        y: this.height / 2 - 35,
         color: targetColor,
         life: 1.0,
       });
 
-      // Spawn particle explosions for deleted blocks
+      // Spawn particle bursts
       toDelete.forEach(({ lane, index }) => {
         this.spawnBlockParticles(lane, index, targetColor);
       });
 
-      // Remove deleted blocks and let remaining collapse
-      // Group by lane
+      // Group by lane and remove blocks
       const byLane = {};
       toDelete.forEach(({ lane, index }) => {
         if (!byLane[lane]) byLane[lane] = [];
@@ -554,7 +559,6 @@ export class HextrisGame {
 
       Object.entries(byLane).forEach(([lStr, indices]) => {
         const l = parseInt(lStr, 10);
-        // Sort indices descending so splice doesn't shift later targets
         indices.sort((a, b) => b - a);
         indices.forEach((idx) => {
           this.lanes[l].splice(idx, 1);
@@ -566,7 +570,8 @@ export class HextrisGame {
   spawnBlockParticles(lane, index, color) {
     const cx = this.width / 2;
     const cy = this.height / 2;
-    const angle = (lane * 60 * Math.PI) / 180 + this.rotation;
+    // Lane center angle
+    const angle = (lane * 60) * (Math.PI / 180) + this.rotation;
     const dist = this.hexRadius + index * this.blockHeight + this.blockHeight / 2;
 
     const px = cx + Math.cos(angle) * dist;
@@ -613,30 +618,38 @@ export class HextrisGame {
 
     ctx.clearRect(0, 0, this.width, this.height);
 
-    // 1. Draw Danger / Boundary Ring
+    // 1. Draw Outer Hexagonal Danger Boundary (Aligned with current rotation)
     ctx.save();
     ctx.beginPath();
-    ctx.arc(cx, cy, this.dangerRingRadius, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(239, 68, 68, 0.25)';
-    ctx.lineWidth = 3;
+    for (let i = 0; i < this.sides; i++) {
+      const a = (i * 60 - 30) * (Math.PI / 180) + this.rotation;
+      const x = cx + Math.cos(a) * (this.dangerRingRadius + 4);
+      const y = cy + Math.sin(a) * (this.dangerRingRadius + 4);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(239, 68, 68, 0.4)';
+    ctx.lineWidth = 2.5;
     ctx.setLineDash([8, 8]);
     ctx.stroke();
     ctx.restore();
 
-    // 2. Draw Lane Radial Dividers (subtle dark grid)
+    // 2. Draw Lane Radial Dividers (from hexagon vertices outwards)
     ctx.save();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.07)';
     ctx.lineWidth = 1.5;
     for (let i = 0; i < this.sides; i++) {
-      const angle = (i * 60 + 30) * (Math.PI / 180) + this.rotation;
+      // Vertex angle: i * 60 - 30 deg
+      const angle = (i * 60 - 30) * (Math.PI / 180) + this.rotation;
       ctx.beginPath();
       ctx.moveTo(cx + Math.cos(angle) * this.hexRadius, cy + Math.sin(angle) * this.hexRadius);
-      ctx.lineTo(cx + Math.cos(angle) * (this.dangerRingRadius + 40), cy + Math.sin(angle) * (this.dangerRingRadius + 40));
+      ctx.lineTo(cx + Math.cos(angle) * (this.dangerRingRadius + 30), cy + Math.sin(angle) * (this.dangerRingRadius + 30));
       ctx.stroke();
     }
     ctx.restore();
 
-    // 3. Draw Settled Blocks on the Rotated Hexagon
+    // 3. Draw Settled Blocks on the Central Hexagon
     for (let lane = 0; lane < this.sides; lane++) {
       const stack = this.lanes[lane];
       for (let idx = 0; idx < stack.length; idx++) {
@@ -648,14 +661,14 @@ export class HextrisGame {
       }
     }
 
-    // 4. Draw Center Hexagon Core
+    // 4. Draw Center Hexagon Core (Vertices at i * 60 - 30 deg)
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(this.rotation);
 
     ctx.beginPath();
     for (let i = 0; i < this.sides; i++) {
-      const a = (i * 60) * (Math.PI / 180);
+      const a = (i * 60 - 30) * (Math.PI / 180);
       const x = Math.cos(a) * this.hexRadius;
       const y = Math.sin(a) * this.hexRadius;
       if (i === 0) ctx.moveTo(x, y);
@@ -663,7 +676,7 @@ export class HextrisGame {
     }
     ctx.closePath();
 
-    // Center fill gradient
+    // Radial gradient fill
     const grad = ctx.createRadialGradient(0, 0, 5, 0, 0, this.hexRadius);
     grad.addColorStop(0, '#1e293b');
     grad.addColorStop(1, '#0f172a');
@@ -671,11 +684,11 @@ export class HextrisGame {
     ctx.fill();
 
     ctx.strokeStyle = '#38bdf8';
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 3.5;
     ctx.stroke();
 
-    // Center icon/indicator
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    // Center badge
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
     ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -683,12 +696,11 @@ export class HextrisGame {
 
     ctx.restore();
 
-    // 5. Draw Incoming Falling Blocks
+    // 5. Draw Incoming Falling Blocks (World orientation baseRotation = 0)
     for (let i = 0; i < this.fallingBlocks.length; i++) {
       const b = this.fallingBlocks[i];
       const innerR = b.dist;
       const outerR = b.dist + b.height;
-      // Fixed world spawn orientation
       this.drawTrapezoid(cx, cy, b.spawnLane, innerR, outerR, b.color, 0);
     }
 
@@ -704,7 +716,7 @@ export class HextrisGame {
       ctx.restore();
     }
 
-    // 7. Draw Floating Text Notifications
+    // 7. Draw Floating Text Popups
     for (let i = 0; i < this.floatingTexts.length; i++) {
       const t = this.floatingTexts[i];
       ctx.save();
@@ -725,23 +737,28 @@ export class HextrisGame {
     }
   }
 
-  // Draw trapezoidal block slice fitting neatly onto hexagonal sector
+  // Draw geometrically exact trapezoidal block matching regular hexagon edges
   drawTrapezoid(cx, cy, laneIndex, r1, r2, color, baseRotation = 0) {
     const ctx = this.ctx;
-    const a1 = (laneIndex * 60 - 30) * (Math.PI / 180) + baseRotation;
-    const a2 = (laneIndex * 60 + 30) * (Math.PI / 180) + baseRotation;
+    // Crisp angular gap (0.8 degree) and radial gap (1.2px) for crisp arcade tile appearance
+    const padAngle = 0.015;
+    const a1 = (laneIndex * 60 - 30) * (Math.PI / 180) + baseRotation + padAngle;
+    const a2 = (laneIndex * 60 + 30) * (Math.PI / 180) + baseRotation - padAngle;
 
-    // Small gap padding for crisp visual block separation
-    const pad = 1.2;
-    const innerR = r1 + pad;
-    const outerR = r2 - pad;
+    const padR = 1.0;
+    const innerR = r1 + padR;
+    const outerR = r2 - padR;
 
+    // Corner 1: Inner Left
     const p1x = cx + Math.cos(a1) * innerR;
     const p1y = cy + Math.sin(a1) * innerR;
+    // Corner 2: Inner Right
     const p2x = cx + Math.cos(a2) * innerR;
     const p2y = cy + Math.sin(a2) * innerR;
+    // Corner 3: Outer Right
     const p3x = cx + Math.cos(a2) * outerR;
     const p3y = cy + Math.sin(a2) * outerR;
+    // Corner 4: Outer Left
     const p4x = cx + Math.cos(a1) * outerR;
     const p4y = cy + Math.sin(a1) * outerR;
 
@@ -757,7 +774,7 @@ export class HextrisGame {
     ctx.fill();
 
     // Subtle edge highlight
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
     ctx.lineWidth = 1;
     ctx.stroke();
 
