@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Social Share / Copy Score to Clipboard
   shareBtn.addEventListener('click', () => {
-    const text = `🎮 I just scored ${game.score} points on Hextris Unblocked! Can you beat my high score? Play free at https://hextrisunblocked.com`;
+    const text = `🎮 I just scored ${game.score} points on Hextris Unblocked! Can you beat my high score? Play free at https://seo-game-website.vercel.app`;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(text).then(() => {
         const originalText = shareBtn.textContent;
