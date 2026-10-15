@@ -1,6 +1,12 @@
-# Hextris Unblocked - SEO 游戏实战练手站
+# Hextris Unblocked - Play Free Online Hexagonal Tetris Game
 
-本项目严格遵循出海与 SEO 专家**哥飞**分享的独立站与游戏站 SEO 方法论搭建，旨在通过低难度（Low KD）、精准搜索意图（High Intent）、零服务器成本的现代静态前端架构，快速跑通**“建站 $\to$ 部署 $\to$ GSC 收录 $\to$ 拿排名前三 $\to$ 广告变现”**的全流程。
+[![Play Online](https://img.shields.io/badge/Play_Online-hextris--unblocked-06b6d4?style=for-the-badge&logo=google-chrome&logoColor=white)](https://seo-game-website.vercel.app/)
+[![Vercel Status](https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://seo-game-website.vercel.app/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+
+> 🎮 **Live Game URL**: **[https://seo-game-website.vercel.app/](https://seo-game-website.vercel.app/)**
+> 
+> A fast-paced, unblocked radial arcade puzzle game built in pure HTML5 Canvas + Web Audio API. 100% free, school Chromebook friendly with zero downloads.
 
 ---
 
