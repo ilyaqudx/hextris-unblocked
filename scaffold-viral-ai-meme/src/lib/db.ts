@@ -63,11 +63,24 @@ function getPgPool(): Pool | null {
 
   try {
     if (!cachedPgPool) {
+      // Strip sslmode parameter from connection string because pg-connection-string
+      // overrides ssl: { rejectUnauthorized: false } with an empty object if sslmode is present,
+      // causing SELF_SIGNED_CERT_IN_CHAIN errors on Supabase.
+      let cleanUrl = pgUrl;
+      try {
+        const u = new URL(pgUrl);
+        u.searchParams.delete('sslmode');
+        u.searchParams.delete('ssl');
+        cleanUrl = u.toString();
+      } catch {
+        cleanUrl = pgUrl.replace(/([?&])sslmode=[^&]+(&|$)/, '$1').replace(/[?&]$/, '');
+      }
+
       cachedPgPool = new Pool({
-        connectionString: pgUrl,
+        connectionString: cleanUrl,
         ssl: { rejectUnauthorized: false },
         max: 10,
-        connectionTimeoutMillis: 4000,
+        connectionTimeoutMillis: 5000,
       });
     }
     return cachedPgPool;
