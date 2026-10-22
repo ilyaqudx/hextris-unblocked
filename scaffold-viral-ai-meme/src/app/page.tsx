@@ -76,6 +76,12 @@ export default function HomePage() {
   };
 
   const handleSelectPack = async (packType: 'solo' | 'trio' | 'crew') => {
+    trackEvent('click_select_pack', {
+      packType,
+      packName: siteConfig.pricing[packType].name,
+      price: siteConfig.pricing[packType].price,
+      signedIn: Boolean(user),
+    });
     if (!user) {
       openAuthModal();
       return;
@@ -127,7 +133,7 @@ export default function HomePage() {
       </header>
 
       {/* 2. Hero Double-Column Workspace */}
-      <section className="max-w-6xl mx-auto px-4 py-12 w-full grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+      <section id="hero" className="max-w-6xl mx-auto px-4 py-12 w-full grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
         {/* Left Column: Video Preview & Carousel */}
         <div className="flex flex-col gap-4">
           <div className="relative aspect-[9/16] max-h-[580px] w-full max-w-[340px] mx-auto rounded-3xl overflow-hidden border border-white/15 bg-neutral-900 shadow-2xl group">
@@ -144,7 +150,11 @@ export default function HomePage() {
             />
             {/* Audio Toggle Pill */}
             <button
-              onClick={() => setIsMuted(!isMuted)}
+              onClick={() => {
+                const nextMuted = !isMuted;
+                setIsMuted(nextMuted);
+                trackEvent('click_toggle_mute', { muted: nextMuted });
+              }}
               className="absolute bottom-4 right-4 bg-black/75 hover:bg-black/90 backdrop-blur text-white text-xs px-3 py-1.5 rounded-full border border-white/20 flex items-center gap-1.5 transition z-10 shadow-lg"
               title={isMuted ? "Click to enable sound" : "Mute sound"}
             >
@@ -157,7 +167,10 @@ export default function HomePage() {
             {siteConfig.examples.map((ex, idx) => (
               <button
                 key={ex.id}
-                onClick={() => setActiveExampleIndex(idx)}
+                onClick={() => {
+                  setActiveExampleIndex(idx);
+                  trackEvent('click_switch_example', { exampleId: ex.id, title: ex.title, index: idx });
+                }}
                 className={`text-xs px-3 py-1.5 rounded-full border transition ${
                   activeExampleIndex === idx
                     ? 'border-amber-400 bg-amber-400/10 text-amber-300 font-semibold'
@@ -191,7 +204,11 @@ export default function HomePage() {
                 <img src={previewUrl} alt="Preview" className="w-24 h-24 rounded-full object-cover border-2 border-amber-400" />
                 <span className="text-xs text-neutral-300">{selectedFile?.name}</span>
                 <button
-                  onClick={() => { setSelectedFile(null); setPreviewUrl(null); }}
+                  onClick={() => {
+                    setSelectedFile(null);
+                    setPreviewUrl(null);
+                    trackEvent('click_remove_photo');
+                  }}
                   className="text-xs text-red-400 hover:underline"
                 >
                   Remove & replace
@@ -227,7 +244,10 @@ export default function HomePage() {
             <input
               type="checkbox"
               checked={consentChecked}
-              onChange={(e) => setConsentChecked(e.target.checked)}
+              onChange={(e) => {
+                setConsentChecked(e.target.checked);
+                trackEvent('click_toggle_consent', { checked: e.target.checked });
+              }}
               className="mt-0.5 rounded border-neutral-700 text-amber-500 focus:ring-0 bg-neutral-900"
             />
             <span>{siteConfig.consentCheckboxText}</span>
@@ -288,6 +308,7 @@ export default function HomePage() {
                 <button
                   onClick={() => {
                     setActiveExampleIndex(idx);
+                    trackEvent('click_use_example_style', { exampleId: ex.id, title: ex.title, index: idx });
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                   className="w-full py-2.5 rounded-full bg-white/5 hover:bg-amber-400 hover:text-black font-semibold text-xs transition border border-white/10"
@@ -410,7 +431,15 @@ export default function HomePage() {
         <h2 className="text-3xl font-bold tracking-tight text-center mb-8">Frequently Asked Questions</h2>
         <div className="flex flex-col gap-4">
           {siteConfig.faqs.map((faq, i) => (
-            <details key={i} className="border border-white/10 rounded-2xl p-5 bg-white/[0.01]">
+            <details
+              key={i}
+              onToggle={(e) => {
+                if ((e.target as HTMLDetailsElement).open) {
+                  trackEvent('click_expand_faq', { question: faq.question });
+                }
+              }}
+              className="border border-white/10 rounded-2xl p-5 bg-white/[0.01]"
+            >
               <summary className="font-semibold text-base cursor-pointer select-none text-white hover:text-amber-300 transition">
                 {faq.question}
               </summary>

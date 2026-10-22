@@ -3,6 +3,7 @@ import { siteConfig } from '../../site.config';
 import { generateSchema } from '../lib/schema';
 import { domTranslationGuardScript } from '../lib/dom-guard';
 import { AuthProvider } from '../lib/auth-context';
+import AnalyticsProvider from '../components/AnalyticsProvider';
 import { Toaster } from 'sonner';
 import { Analytics } from '@vercel/analytics/react';
 import './globals.css';
@@ -111,8 +112,10 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-[#090b0c] text-white flex flex-col antialiased">
         <AuthProvider>
-          <Toaster richColors position="top-center" theme="dark" closeButton />
-          {children}
+          <AnalyticsProvider>
+            <Toaster richColors position="top-center" theme="dark" closeButton />
+            {children}
+          </AnalyticsProvider>
         </AuthProvider>
         {/* Vercel Web Analytics Real-Time Tracking */}
         <Analytics />

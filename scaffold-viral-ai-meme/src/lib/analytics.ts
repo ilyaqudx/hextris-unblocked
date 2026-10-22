@@ -1,19 +1,30 @@
 'use client';
 
 import { track } from '@vercel/analytics';
+import { trackCustomEvent } from './tracker';
 
 /**
- * Universal event tracking for Vercel Web Analytics & Google Analytics (GA4)
+ * Universal event tracking for:
+ * 1. Custom MongoDB / PostgreSQL Backend (/api/track)
+ * 2. Vercel Web Analytics
+ * 3. Google Analytics 4 (GA4)
  */
 export function trackEvent(
   eventName: string,
-  eventParams?: Record<string, string | number | boolean>
+  eventParams?: Record<string, any>
 ) {
   try {
-    // 1. Send to Vercel Analytics
+    // 1. Dispatch to custom backend API -> MongoDB / PostgreSQL
+    trackCustomEvent({
+      eventName,
+      eventType: eventName.startsWith('click_') ? 'click' : eventName.startsWith('view_') ? 'view' : 'interaction',
+      payload: eventParams,
+    });
+
+    // 2. Dispatch to Vercel Analytics
     track(eventName, eventParams);
 
-    // 2. Send to Google Analytics 4 (if configured)
+    // 3. Dispatch to Google Analytics 4 (if configured)
     if (typeof window !== 'undefined' && (window as any).gtag) {
       (window as any).gtag('event', eventName, eventParams);
     }
@@ -26,3 +37,5 @@ export function trackEvent(
     console.error('Failed to dispatch analytics event', err);
   }
 }
+
+export * from './tracker';

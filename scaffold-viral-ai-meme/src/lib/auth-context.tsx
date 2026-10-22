@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { trackEvent } from './analytics';
 
 export interface User {
   id: string;
@@ -75,6 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(newUser);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(newUser));
         setIsAuthModalOpen(false);
+        trackEvent('user_login', { method: 'google', email: newUser.email, name: newUser.name, credits: newUser.credits });
         toast.success(`Welcome back, ${newUser.name}!`, {
           description: 'Signed in with your Google Account.',
         });
@@ -141,12 +143,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(mockUser);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(mockUser));
     setIsAuthModalOpen(false);
+    trackEvent('user_login', { method: 'mock_google', email: mockUser.email, name: mockUser.name, credits: mockUser.credits });
     toast.success('Signed in with Google!', {
       description: `Welcome ${mockUser.name} (${mockUser.email})`,
     });
   };
 
   const signOut = () => {
+    trackEvent('user_sign_out', { userId: user?.id, email: user?.email });
     setUser(null);
     localStorage.removeItem(STORAGE_KEY);
     toast.info('Signed out successfully.');
@@ -157,6 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const updated = { ...user, credits: user.credits + amount };
     setUser(updated);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    trackEvent('add_credits', { amount, newBalance: updated.credits });
     toast.success(`Added ${amount} video credits!`, {
       description: `New balance: ${updated.credits} credits`,
     });
@@ -176,6 +181,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const updated = { ...user, credits: user.credits - 1 };
     setUser(updated);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    trackEvent('use_credit_render', { remainingCredits: updated.credits });
     return true;
   };
 
