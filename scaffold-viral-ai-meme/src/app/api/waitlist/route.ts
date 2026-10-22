@@ -87,6 +87,7 @@ export async function POST(req: NextRequest) {
       {
         ok: true,
         message: 'Successfully joined the waitlist! We will notify you first upon launch.',
+        savedToBlob: result.blob || false,
         savedToMongo: result.mongo || false,
         savedToPostgres: result.postgres || false,
       },

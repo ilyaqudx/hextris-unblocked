@@ -1,5 +1,10 @@
 import { MongoClient, Db } from 'mongodb';
 import { Pool } from 'pg';
+import { put, list } from '@vercel/blob';
+
+function hasBlobStorage(): boolean {
+  return !!(process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID);
+}
 
 export interface UserEventRecord {
   eventName: string;
@@ -144,14 +149,30 @@ async function ensurePgTable(pool: Pool) {
 }
 
 /**
- * Main Save Method: writes to MongoDB and/or PostgreSQL
+ * Main Save Method: writes to Vercel Blob, MongoDB and/or PostgreSQL
  */
-export async function saveUserEvent(event: UserEventRecord): Promise<{ success: boolean; mongo?: boolean; postgres?: boolean; error?: string }> {
+export async function saveUserEvent(event: UserEventRecord): Promise<{ success: boolean; mongo?: boolean; postgres?: boolean; blob?: boolean; error?: string }> {
   let savedToMongo = false;
   let savedToPg = false;
+  let savedToBlob = false;
   const createdAt = new Date();
 
-  // 1. Try MongoDB
+  // 1. Try Vercel Blob (native, zero-maintenance serverless store)
+  try {
+    if (hasBlobStorage()) {
+      const eventId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+      const payloadString = JSON.stringify({ ...event, createdAt: createdAt.toISOString() });
+      await put(`events/${eventId}.json`, payloadString, {
+        access: 'private',
+        contentType: 'application/json',
+      });
+      savedToBlob = true;
+    }
+  } catch (err) {
+    console.error('[DB] Failed writing to Vercel Blob:', err);
+  }
+
+  // 2. Try MongoDB
   try {
     const mongoDb = await getMongoDb();
     if (mongoDb) {
@@ -166,7 +187,7 @@ export async function saveUserEvent(event: UserEventRecord): Promise<{ success: 
     console.error('[DB] Failed writing to MongoDB:', err);
   }
 
-  // 2. Try PostgreSQL / Supabase
+  // 3. Try PostgreSQL / Supabase
   try {
     const pool = getPgPool();
     if (pool) {
@@ -212,7 +233,7 @@ export async function saveUserEvent(event: UserEventRecord): Promise<{ success: 
   }
 
   // Fallback logging if no DB connected yet
-  if (!savedToMongo && !savedToPg) {
+  if (!savedToMongo && !savedToPg && !savedToBlob) {
     console.log('[TRACKER LOG BUFFER]', JSON.stringify({ ...event, createdAt }));
   }
 
@@ -220,6 +241,7 @@ export async function saveUserEvent(event: UserEventRecord): Promise<{ success: 
     success: true,
     mongo: savedToMongo,
     postgres: savedToPg,
+    blob: savedToBlob,
   };
 }
 
@@ -227,7 +249,38 @@ export async function saveUserEvent(event: UserEventRecord): Promise<{ success: 
  * Query recent events for dashboard / verification
  */
 export async function getRecentUserEvents(limit = 50) {
-  // 1. Try MongoDB
+  // 1. Try Vercel Blob
+  try {
+    if (hasBlobStorage()) {
+      const { blobs } = await list({ prefix: 'events/', limit: Math.min(limit * 2, 100) });
+      if (blobs && blobs.length > 0) {
+        const sorted = blobs
+          .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())
+          .slice(0, limit);
+
+        const token = process.env.BLOB_READ_WRITE_TOKEN;
+        const events = await Promise.all(
+          sorted.map(async (blob) => {
+            try {
+              const res = await fetch(blob.downloadUrl || blob.url, {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+              });
+              if (!res.ok) return null;
+              return await res.json();
+            } catch {
+              return null;
+            }
+          })
+        );
+        const validEvents = events.filter(Boolean);
+        return { source: 'vercel_blob', count: validEvents.length, events: validEvents };
+      }
+    }
+  } catch (err) {
+    console.error('[DB] Failed querying Vercel Blob:', err);
+  }
+
+  // 2. Try MongoDB
   try {
     const mongoDb = await getMongoDb();
     if (mongoDb) {
@@ -239,7 +292,7 @@ export async function getRecentUserEvents(limit = 50) {
     console.error('[DB] Failed querying MongoDB:', err);
   }
 
-  // 2. Try PostgreSQL
+  // 3. Try PostgreSQL
   try {
     const pool = getPgPool();
     if (pool) {
@@ -267,15 +320,31 @@ export interface WaitlistSubscriberRecord {
 }
 
 /**
- * Save email subscriber to MongoDB and/or PostgreSQL
+ * Save email subscriber to Vercel Blob, MongoDB and/or PostgreSQL
  */
-export async function saveWaitlistSubscriber(subscriber: WaitlistSubscriberRecord): Promise<{ success: boolean; mongo?: boolean; postgres?: boolean; error?: string }> {
+export async function saveWaitlistSubscriber(subscriber: WaitlistSubscriberRecord): Promise<{ success: boolean; mongo?: boolean; postgres?: boolean; blob?: boolean; error?: string }> {
   let savedToMongo = false;
   let savedToPg = false;
+  let savedToBlob = false;
   const normalizedEmail = subscriber.email.toLowerCase().trim();
   const createdAt = new Date();
 
-  // 1. Try MongoDB
+  // 1. Try Vercel Blob
+  try {
+    if (hasBlobStorage()) {
+      const key = `waitlist/${encodeURIComponent(normalizedEmail)}.json`;
+      const record = { ...subscriber, email: normalizedEmail, createdAt: createdAt.toISOString() };
+      await put(key, JSON.stringify(record), {
+        access: 'private',
+        contentType: 'application/json',
+      });
+      savedToBlob = true;
+    }
+  } catch (err) {
+    console.error('[DB] Failed saving waitlist to Vercel Blob:', err);
+  }
+
+  // 2. Try MongoDB
   try {
     const mongoDb = await getMongoDb();
     if (mongoDb) {
@@ -302,7 +371,7 @@ export async function saveWaitlistSubscriber(subscriber: WaitlistSubscriberRecor
     console.error('[DB] Failed saving waitlist to MongoDB:', err);
   }
 
-  // 2. Try PostgreSQL
+  // 3. Try PostgreSQL
   try {
     const pool = getPgPool();
     if (pool) {
@@ -334,7 +403,7 @@ export async function saveWaitlistSubscriber(subscriber: WaitlistSubscriberRecor
     console.error('[DB] Failed saving waitlist to PostgreSQL:', err);
   }
 
-  if (!savedToMongo && !savedToPg) {
+  if (!savedToMongo && !savedToPg && !savedToBlob) {
     console.log('[WAITLIST LOG BUFFER]', JSON.stringify({ ...subscriber, email: normalizedEmail, createdAt }));
   }
 
@@ -342,6 +411,7 @@ export async function saveWaitlistSubscriber(subscriber: WaitlistSubscriberRecor
     success: true,
     mongo: savedToMongo,
     postgres: savedToPg,
+    blob: savedToBlob,
   };
 }
 
@@ -349,6 +419,17 @@ export async function saveWaitlistSubscriber(subscriber: WaitlistSubscriberRecor
  * Get total waitlist subscriber count
  */
 export async function getWaitlistCount(): Promise<number> {
+  // 1. Try Vercel Blob
+  try {
+    if (hasBlobStorage()) {
+      const { blobs } = await list({ prefix: 'waitlist/' });
+      if (blobs && blobs.length > 0) {
+        return blobs.length;
+      }
+    }
+  } catch {}
+
+  // 2. Try MongoDB
   try {
     const mongoDb = await getMongoDb();
     if (mongoDb) {
@@ -356,6 +437,7 @@ export async function getWaitlistCount(): Promise<number> {
     }
   } catch {}
 
+  // 3. Try PostgreSQL
   try {
     const pool = getPgPool();
     if (pool) {

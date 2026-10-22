@@ -70,6 +70,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         ok: true,
+        savedToBlob: result.blob || false,
         savedToMongo: result.mongo || false,
         savedToPostgres: result.postgres || false,
         event: {
