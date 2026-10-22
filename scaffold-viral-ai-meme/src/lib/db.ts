@@ -450,3 +450,71 @@ export async function getWaitlistCount(): Promise<number> {
   return 0;
 }
 
+/**
+ * Get all waitlist subscribers with emails and metadata
+ */
+export async function getWaitlistSubscribers(limit = 100): Promise<WaitlistSubscriberRecord[]> {
+  // 1. Try Vercel Blob
+  try {
+    if (hasBlobStorage()) {
+      const { blobs } = await list({ prefix: 'waitlist/', limit });
+      if (blobs && blobs.length > 0) {
+        const token = process.env.BLOB_READ_WRITE_TOKEN;
+        const subscribers = await Promise.all(
+          blobs.map(async (blob) => {
+            try {
+              const res = await fetch(blob.downloadUrl || blob.url, {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+              });
+              if (!res.ok) return null;
+              return await res.json();
+            } catch {
+              return null;
+            }
+          })
+        );
+        return subscribers.filter(Boolean);
+      }
+    }
+  } catch (err) {
+    console.error('[DB] Failed querying waitlist subscribers from Blob:', err);
+  }
+
+  // 2. Try MongoDB
+  try {
+    const mongoDb = await getMongoDb();
+    if (mongoDb) {
+      const docs = await mongoDb.collection('waitlist_subscribers').find({}).sort({ createdAt: -1 }).limit(limit).toArray();
+      return docs.map(d => ({
+        email: d.email,
+        source: d.source,
+        reservedPack: d.reservedPack,
+        ip: d.ip,
+        country: d.country,
+        city: d.city,
+        createdAt: d.createdAt,
+      }));
+    }
+  } catch {}
+
+  // 3. Try PostgreSQL
+  try {
+    const pool = getPgPool();
+    if (pool) {
+      await ensurePgTable(pool);
+      const res = await pool.query('SELECT * FROM waitlist_subscribers ORDER BY created_at DESC LIMIT $1', [limit]);
+      return res.rows.map(r => ({
+        email: r.email,
+        source: r.source,
+        reservedPack: r.reserved_pack,
+        ip: r.ip,
+        country: r.country,
+        city: r.city,
+        createdAt: r.created_at,
+      }));
+    }
+  } catch {}
+
+  return [];
+}
+

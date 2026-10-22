@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { saveWaitlistSubscriber, getWaitlistCount, saveUserEvent } from '../../../lib/db';
+import { saveWaitlistSubscriber, getWaitlistCount, getWaitlistSubscribers, saveUserEvent } from '../../../lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -109,11 +109,13 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const count = await getWaitlistCount();
+    const showList = req.nextUrl.searchParams.get('list') === 'true' || req.nextUrl.searchParams.get('all') === 'true';
+    const subscribers = showList ? await getWaitlistSubscribers() : undefined;
     return NextResponse.json(
-      { ok: true, count },
+      { ok: true, count, subscribers },
       {
         headers: {
           'Access-Control-Allow-Origin': '*',
