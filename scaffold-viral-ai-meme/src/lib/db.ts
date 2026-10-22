@@ -106,12 +106,27 @@ async function ensurePgTable(pool: Pool) {
     );
     CREATE INDEX IF NOT EXISTS idx_user_events_name ON user_events(event_name);
     CREATE INDEX IF NOT EXISTS idx_user_events_created_at ON user_events(created_at);
+
+    CREATE TABLE IF NOT EXISTS waitlist_subscribers (
+      id SERIAL PRIMARY KEY,
+      email VARCHAR(255) UNIQUE NOT NULL,
+      source VARCHAR(100),
+      reserved_pack VARCHAR(100),
+      ip VARCHAR(100),
+      country VARCHAR(50),
+      city VARCHAR(50),
+      user_agent TEXT,
+      referrer TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_waitlist_email ON waitlist_subscribers(email);
+    CREATE INDEX IF NOT EXISTS idx_waitlist_created_at ON waitlist_subscribers(created_at);
   `;
   try {
     await pool.query(createTableQuery);
     pgTableInitialized = true;
   } catch (err) {
-    console.error('[DB] Failed to initialize PostgreSQL table:', err);
+    console.error('[DB] Failed to initialize PostgreSQL tables:', err);
   }
 }
 
@@ -224,5 +239,119 @@ export async function getRecentUserEvents(limit = 50) {
   }
 
   return { source: 'none', count: 0, events: [] };
+}
+
+export interface WaitlistSubscriberRecord {
+  email: string;
+  source?: string;
+  reservedPack?: string;
+  ip?: string;
+  country?: string;
+  city?: string;
+  userAgent?: string;
+  referrer?: string;
+  createdAt?: Date;
+}
+
+/**
+ * Save email subscriber to MongoDB and/or PostgreSQL
+ */
+export async function saveWaitlistSubscriber(subscriber: WaitlistSubscriberRecord): Promise<{ success: boolean; mongo?: boolean; postgres?: boolean; error?: string }> {
+  let savedToMongo = false;
+  let savedToPg = false;
+  const normalizedEmail = subscriber.email.toLowerCase().trim();
+  const createdAt = new Date();
+
+  // 1. Try MongoDB
+  try {
+    const mongoDb = await getMongoDb();
+    if (mongoDb) {
+      const collection = mongoDb.collection('waitlist_subscribers');
+      await collection.updateOne(
+        { email: normalizedEmail },
+        {
+          $setOnInsert: {
+            ...subscriber,
+            email: normalizedEmail,
+            createdAt,
+          },
+          $set: {
+            lastSeenAt: createdAt,
+            source: subscriber.source || 'web_waitlist',
+            reservedPack: subscriber.reservedPack || null,
+          },
+        },
+        { upsert: true }
+      );
+      savedToMongo = true;
+    }
+  } catch (err) {
+    console.error('[DB] Failed saving waitlist to MongoDB:', err);
+  }
+
+  // 2. Try PostgreSQL
+  try {
+    const pool = getPgPool();
+    if (pool) {
+      await ensurePgTable(pool);
+      const query = `
+        INSERT INTO waitlist_subscribers (
+          email, source, reserved_pack, ip, country, city, user_agent, referrer, created_at
+        ) VALUES (
+          $1, $2, $3, $4, $5, $6, $7, $8, $9
+        )
+        ON CONFLICT (email) DO UPDATE SET
+          reserved_pack = COALESCE(EXCLUDED.reserved_pack, waitlist_subscribers.reserved_pack)
+      `;
+      const values = [
+        normalizedEmail,
+        subscriber.source || 'web_waitlist',
+        subscriber.reservedPack || null,
+        subscriber.ip || null,
+        subscriber.country || null,
+        subscriber.city || null,
+        subscriber.userAgent || null,
+        subscriber.referrer || null,
+        createdAt,
+      ];
+      await pool.query(query, values);
+      savedToPg = true;
+    }
+  } catch (err) {
+    console.error('[DB] Failed saving waitlist to PostgreSQL:', err);
+  }
+
+  if (!savedToMongo && !savedToPg) {
+    console.log('[WAITLIST LOG BUFFER]', JSON.stringify({ ...subscriber, email: normalizedEmail, createdAt }));
+  }
+
+  return {
+    success: true,
+    mongo: savedToMongo,
+    postgres: savedToPg,
+  };
+}
+
+/**
+ * Get total waitlist subscriber count
+ */
+export async function getWaitlistCount(): Promise<number> {
+  try {
+    const mongoDb = await getMongoDb();
+    if (mongoDb) {
+      return await mongoDb.collection('waitlist_subscribers').countDocuments();
+    }
+  } catch {}
+
+  try {
+    const pool = getPgPool();
+    if (pool) {
+      await ensurePgTable(pool);
+      const res = await pool.query('SELECT COUNT(*) FROM waitlist_subscribers');
+      return parseInt(res.rows[0].count, 10) || 0;
+    }
+  } catch {}
+
+  return 0;
 }
 

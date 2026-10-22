@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from 'next';
 import { siteConfig } from '../../site.config';
 import { generateSchema } from '../lib/schema';
 import { domTranslationGuardScript } from '../lib/dom-guard';
-import { AuthProvider } from '../lib/auth-context';
 import AnalyticsProvider from '../components/AnalyticsProvider';
 import { Toaster } from 'sonner';
 import { Analytics } from '@vercel/analytics/react';
@@ -66,8 +65,6 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         {/* DOM translation guard to prevent Google Translate React crash */}
         <script dangerouslySetInnerHTML={{ __html: domTranslationGuardScript }} />
-        {/* Google Identity Services for Google Login */}
-        <script src="https://accounts.google.com/gsi/client" async defer></script>
         {/* Ahrefs Web Analytics */}
         <script
           dangerouslySetInnerHTML={{
@@ -111,12 +108,10 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-[#090b0c] text-white flex flex-col antialiased">
-        <AuthProvider>
-          <AnalyticsProvider>
-            <Toaster richColors position="top-center" theme="dark" closeButton />
-            {children}
-          </AnalyticsProvider>
-        </AuthProvider>
+        <AnalyticsProvider>
+          <Toaster richColors position="top-center" theme="dark" closeButton />
+          {children}
+        </AnalyticsProvider>
         {/* Vercel Web Analytics Real-Time Tracking */}
         <Analytics />
       </body>

@@ -2,23 +2,19 @@
 
 import React, { useState } from 'react';
 import { siteConfig } from '../../site.config';
-import { useAuth } from '../lib/auth-context';
 import { toast } from 'sonner';
-import UserNav from '../components/UserNav';
-import AuthModal from '../components/AuthModal';
-import CheckoutModal from '../components/CheckoutModal';
+import WaitlistModal from '../components/WaitlistModal';
 import BrandLogo from '../components/BrandLogo';
 import { trackEvent } from '../lib/analytics';
 
 export default function HomePage() {
-  const { user, openAuthModal } = useAuth();
   const [activeExampleIndex, setActiveExampleIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [consentChecked, setConsentChecked] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const [showWaitlistModal, setShowWaitlistModal] = useState(false);
+  const [reservedPack, setReservedPack] = useState<string | undefined>(undefined);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -39,7 +35,6 @@ export default function HomePage() {
     trackEvent('click_create_video', {
       hasFile: Boolean(selectedFile),
       consentChecked,
-      signedIn: Boolean(user),
     });
 
     if (!selectedFile) {
@@ -54,60 +49,20 @@ export default function HomePage() {
       });
       return;
     }
-    if (!user) {
-      toast.info('Sign in with Google required', {
-        description: 'Please sign in to save and generate your video.',
-      });
-      openAuthModal();
-      return;
-    }
-    // Direct user to select a pack or use existing credit
-    setShowCheckoutModal(true);
+    // Direct user to priority waitlist modal with free credits
+    setReservedPack('Driver Preview');
+    setShowWaitlistModal(true);
   };
 
-  const handleGenerateWithCredit = () => {
-    toast.loading('Synthesizing your Hit The Road Dude video...', { id: 'video-render' });
-    setTimeout(() => {
-      toast.success('Video generation complete! Check the preview window.', {
-        id: 'video-render',
-        description: 'Your 9:16 vertical video is ready to download.',
-      });
-    }, 2500);
-  };
-
-  const handleSelectPack = async (packType: 'solo' | 'trio' | 'crew') => {
+  const handleSelectPack = (packType: 'solo' | 'trio' | 'crew') => {
+    const packName = siteConfig.pricing[packType].name;
     trackEvent('click_select_pack', {
       packType,
-      packName: siteConfig.pricing[packType].name,
+      packName,
       price: siteConfig.pricing[packType].price,
-      signedIn: Boolean(user),
     });
-    if (!user) {
-      openAuthModal();
-      return;
-    }
-    try {
-      setIsUploading(true);
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ packType }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        toast.error('Checkout failed', {
-          description: data.error || 'Unable to open checkout session',
-        });
-      }
-    } catch (err: any) {
-      toast.error('Payment error', {
-        description: err.message || 'Please check your connection and try again.',
-      });
-    } finally {
-      setIsUploading(false);
-    }
+    setReservedPack(packName);
+    setShowWaitlistModal(true);
   };
 
   return (
@@ -127,8 +82,18 @@ export default function HomePage() {
             <a href="#pricing" className="hover:text-white transition">Pricing</a>
             <a href="#faq" className="hover:text-white transition">FAQ</a>
           </nav>
-          {/* User Profile / Google Sign In */}
-          <UserNav />
+          {/* Join Waitlist CTA Button */}
+          <button
+            onClick={() => {
+              setReservedPack(undefined);
+              setShowWaitlistModal(true);
+              trackEvent('click_nav_waitlist_btn');
+            }}
+            className="px-4 py-2 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black text-xs sm:text-sm font-black transition shadow-md shadow-amber-500/20 active:scale-95 flex items-center gap-1.5"
+          >
+            <span>✨</span>
+            <span>Join Waitlist</span>
+          </button>
         </div>
       </header>
 
@@ -256,8 +221,7 @@ export default function HomePage() {
           {/* CTA Generate Button */}
           <button
             onClick={handleCreateClick}
-            disabled={isUploading}
-            className="w-full py-4 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-black font-bold text-base transition shadow-lg shadow-orange-500/20 active:scale-[0.99] disabled:opacity-50"
+            className="w-full py-4 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-black font-bold text-base transition shadow-lg shadow-orange-500/20 active:scale-[0.99]"
           >
             Create My Video →
           </button>
@@ -500,12 +464,11 @@ export default function HomePage() {
         <p>© {new Date().getFullYear()} {siteConfig.name}. {siteConfig.disclaimer}</p>
       </footer>
 
-      {/* Global Modals */}
-      <AuthModal />
-      <CheckoutModal
-        isOpen={showCheckoutModal}
-        onClose={() => setShowCheckoutModal(false)}
-        onGenerateWithCredit={handleGenerateWithCredit}
+      {/* Global Waitlist Modal */}
+      <WaitlistModal
+        isOpen={showWaitlistModal}
+        onClose={() => setShowWaitlistModal(false)}
+        reservedPack={reservedPack}
       />
     </div>
   );
