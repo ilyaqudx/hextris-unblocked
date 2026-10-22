@@ -112,8 +112,21 @@ export default function WaitlistModal({ isOpen, onClose, reservedPack }: Waitlis
             </div>
             <h3 className="text-2xl font-black text-white">You're On The Priority List!</h3>
             <p className="text-xs text-neutral-400 leading-relaxed max-w-xs">
-              We've registered <strong className="text-amber-300">{email}</strong> for early access. You'll receive an exclusive invite code with 3 free video credits as soon as the render queue opens.
+              We've registered <strong className="text-amber-300">{email}</strong> for early access.
             </p>
+
+            {/* Clear Next Steps Explanation */}
+            <div className="w-full mt-2 p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 text-left flex flex-col gap-2 text-xs text-neutral-300">
+              <div className="flex items-start gap-2">
+                <span className="text-emerald-400 font-bold">📬</span>
+                <span><strong>Next step:</strong> We will email your private activation link and <strong className="text-amber-300">3 free video credits</strong> as soon as your server batch is ready.</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-amber-400 font-bold">⏱</span>
+                <span><strong>Estimated time:</strong> We roll out slots in batches every 24–48 hours. Check your inbox (or promotions tab)!</span>
+              </div>
+            </div>
+
             <button
               onClick={onClose}
               className="mt-4 px-6 py-2.5 rounded-full bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs transition"
@@ -136,11 +149,27 @@ export default function WaitlistModal({ isOpen, onClose, reservedPack }: Waitlis
                 </div>
               )}
               <p className="text-xs text-neutral-400 mt-2 leading-relaxed">
-                Be the first to create viral “Hit the road, dude” AI videos. Waitlist members get priority GPU rendering and <strong className="text-white">3 free video credits</strong> at launch.
+                Be the first to turn your photos into viral “Hit the road, dude” AI videos.
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="w-full mt-6 flex flex-col gap-3">
+            {/* Purpose & Value Proposition Box */}
+            <div className="w-full mt-4 p-3 rounded-2xl bg-white/[0.03] border border-white/5 text-left flex flex-col gap-2 text-[11px] text-neutral-300">
+              <div className="flex items-start gap-2">
+                <span className="text-amber-400 font-bold">•</span>
+                <span><strong>Why waitlist?</strong> To prevent GPU overload and ensure ultra-fast 60s rendering, we onboard creators in controlled batches.</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-amber-400 font-bold">•</span>
+                <span><strong>How we contact you:</strong> We'll email your private invite link with <strong className="text-amber-300">3 free video credits</strong> when your turn opens.</span>
+              </div>
+              <div className="flex items-start gap-2 text-neutral-400">
+                <span className="text-emerald-400 font-bold">✓</span>
+                <span>100% spam-free. We only email you when your generation slot is live.</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="w-full mt-4 flex flex-col gap-3">
               <div className="relative">
                 <input
                   type="email"
@@ -162,7 +191,7 @@ export default function WaitlistModal({ isOpen, onClose, reservedPack }: Waitlis
             </form>
 
             {/* Social Proof */}
-            <div className="mt-5 flex items-center gap-2 text-[11px] text-neutral-500">
+            <div className="mt-4 flex items-center gap-2 text-[11px] text-neutral-500">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
               <span>
                 {waitlistCount && waitlistCount > 0
