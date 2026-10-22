@@ -69,9 +69,15 @@ export default function RootLayout({
         <script src="https://accounts.google.com/gsi/client" async defer></script>
         {/* Ahrefs Web Analytics */}
         <script
-          src="https://analytics.ahrefs.com/analytics.js"
-          data-key="ZEfmbQDvCk/G2cxjmCWtFw"
-          async
+          dangerouslySetInnerHTML={{
+            __html: `
+              var ahrefs_analytics_script = document.createElement('script');
+              ahrefs_analytics_script.async = true;
+              ahrefs_analytics_script.src = 'https://analytics.ahrefs.com/analytics.js';
+              ahrefs_analytics_script.setAttribute('data-key', 'ZEfmbQDvCk/G2cxjmCWtFw');
+              document.getElementsByTagName('head')[0].appendChild(ahrefs_analytics_script);
+            `,
+          }}
         />
         {/* Optional Google Analytics 4 (GA4) */}
         {gaId && (
