@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#181c22" />
+      <stop offset="100%" stop-color="#0a0c0f" />
+    </linearGradient>
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="50%" stop-color="#f97316" />
+      <stop offset="100%" stop-color="#ea580c" />
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047" />
+      <stop offset="50%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#ea580c" />
+    </linearGradient>
+    <linearGradient id="roadGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#334155" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Squircle Base with Metallic/Amber Border -->
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bgGrad)" stroke="url(#borderGrad)" stroke-width="2" />
+
+  <!-- Perspective Road -->
+  <path d="M24 50 L28 26 H36 L40 50 H24 Z" fill="url(#roadGrad)" opacity="0.85" />
+  <line x1="32" y1="30" x2="32" y2="34" stroke="#fde047" stroke-width="2" stroke-linecap="round" />
+  <line x1="32" y1="39" x2="32" y2="46" stroke="#fde047" stroke-width="2.5" stroke-linecap="round" />
+
+  <!-- Pickup Cab & Windshield -->
+  <path d="M21 34 L24 23 C24.8 20.8 26.6 20 29 20 H35 C37.4 20 39.2 20.8 40 23 L43 34 H21 Z" fill="#090b0e" stroke="url(#amberGrad)" stroke-width="2.5" stroke-linejoin="round" />
+
+  <!-- Pickup Hood & Front Bumper -->
+  <path d="M14 41 C14 37 17 34 21 34 H43 C47 34 50 37 50 41 V46 C50 47.1 49.1 48 48 48 H16 C14.9 48 14 47.1 14 46 V41 Z" fill="url(#amberGrad)" />
+
+  <!-- Headlights with glow -->
+  <circle cx="19" cy="40" r="2.5" fill="#ffffff" filter="url(#glow)" />
+  <circle cx="45" cy="40" r="2.5" fill="#ffffff" filter="url(#glow)" />
+
+  <!-- Grille -->
+  <line x1="26" y1="41" x2="38" y2="41" stroke="#090b0e" stroke-width="2" stroke-linecap="round" />
+  <line x1="28" y1="44" x2="36" y2="44" stroke="#090b0e" stroke-width="2" stroke-linecap="round" />
+
+  <!-- AI Sparkle Star -->
+  <path d="M48 10 C48 14 52 14 52 14 C52 14 48 14 48 18 C48 14 44 14 44 14 C44 14 48 14 48 10 Z" fill="#fde047" filter="url(#glow)" />
+</svg>
