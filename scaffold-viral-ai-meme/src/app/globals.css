@@ -88,6 +88,140 @@ body {
   background-color: rgba(255, 90, 61, 0.04);
 }
 
+/* 3D Showcase Reel Carousel */
+.v-carousel {
+  position: relative;
+  height: 450px;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .v-carousel {
+    height: 380px;
+  }
+}
+
+.v-reel {
+  position: absolute;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  width: 50%;
+  max-width: 250px;
+  height: 100%;
+  background: #171d20;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease, box-shadow 0.4s ease;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+  user-select: none;
+}
+
+.v-reel.is-active {
+  z-index: 3;
+  transform: translateX(0) scale(1) rotate(0deg);
+  opacity: 1;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 20px 50px rgba(0, 0, 0, 0.7);
+}
+
+.v-reel.is-left {
+  transform: translateX(-64%) scale(0.84) rotate(-5deg);
+  z-index: 1;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.v-reel.is-right {
+  transform: translateX(64%) scale(0.84) rotate(5deg);
+  z-index: 1;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.v-reel.is-left:hover,
+.v-reel.is-right:hover {
+  opacity: 0.85;
+}
+
+.v-carousel-arrow {
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: rgba(23, 32, 35, 0.85);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.v-carousel-arrow:hover {
+  background: #334043;
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.v-carousel-arrow.prev {
+  left: 2px;
+}
+
+.v-carousel-arrow.next {
+  right: 2px;
+}
+
+.v-reel-sound {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  color: white;
+  background: rgba(9, 11, 12, 0.75);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.v-reel-sound:hover {
+  background: rgba(9, 11, 12, 0.95);
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+}
+
+.v-dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.v-dot {
+  height: 6px;
+  width: 6px;
+  border-radius: 9999px;
+  background: #3a4245;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.v-dot.active {
+  width: 22px;
+  background: var(--brand-primary);
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

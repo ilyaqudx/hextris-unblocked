@@ -6,6 +6,17 @@ import { toast } from 'sonner';
 import WaitlistModal from '../components/WaitlistModal';
 import BrandLogo from '../components/BrandLogo';
 import { trackEvent } from '../lib/analytics';
+import {
+  Volume2,
+  VolumeX,
+  ChevronLeft,
+  ChevronRight,
+  ImagePlus,
+  ArrowRight,
+  Expand,
+  Check,
+  X,
+} from 'lucide-react';
 
 export default function HomePage() {
   const [activeExampleIndex, setActiveExampleIndex] = useState(0);
@@ -15,6 +26,28 @@ export default function HomePage() {
   const [consentChecked, setConsentChecked] = useState(false);
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   const [reservedPack, setReservedPack] = useState<string | undefined>(undefined);
+
+  const totalExamples = siteConfig.examples.length;
+
+  const handlePrevExample = () => {
+    const nextIdx = (activeExampleIndex - 1 + totalExamples) % totalExamples;
+    setActiveExampleIndex(nextIdx);
+    trackEvent('click_switch_example', {
+      exampleId: siteConfig.examples[nextIdx].id,
+      title: siteConfig.examples[nextIdx].title,
+      index: nextIdx,
+    });
+  };
+
+  const handleNextExample = () => {
+    const nextIdx = (activeExampleIndex + 1) % totalExamples;
+    setActiveExampleIndex(nextIdx);
+    trackEvent('click_switch_example', {
+      exampleId: siteConfig.examples[nextIdx].id,
+      title: siteConfig.examples[nextIdx].title,
+      index: nextIdx,
+    });
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -73,55 +106,61 @@ export default function HomePage() {
 
   return (
     <div className="flex-1 flex flex-col relative text-[#f5f6f6] bg-[#090b0c]">
-      {/* 1. Header */}
-      <header className="h-[68px] border-b border-white/[0.06] px-6 sm:px-10 flex items-center justify-between sticky top-0 bg-[#090b0cf2] backdrop-blur-md z-40">
-        <a href="/" className="flex items-center gap-2.5 group">
-          <BrandLogo size="md" />
-          <span className="text-lg font-bold tracking-tight text-white group-hover:text-white/90 transition">
-            Hit The Road <span className="text-[#ff5a3d]">Dude AI</span>
-          </span>
-        </a>
+      {/* 1. Header with Centered Navigation and Larger Font */}
+      <header className="h-[72px] border-b border-white/[0.08] px-6 sm:px-12 sticky top-0 bg-[#090b0cf2] backdrop-blur-md z-40">
+        <div className="max-w-[1320px] mx-auto h-full flex items-center justify-between relative">
+          {/* Left Brand Logo */}
+          <a href="/" className="flex items-center gap-2.5 group shrink-0">
+            <BrandLogo size="md" />
+            <span className="text-[17px] sm:text-lg font-bold tracking-tight text-white group-hover:text-white/90 transition">
+              Hit The Road <span className="text-[#ff5a3d]">Dude AI</span>
+            </span>
+          </a>
 
-        <div className="flex items-center gap-6">
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-[#c8d1d6]">
-            <a href="#create" className="hover:text-white transition-colors">Create</a>
-            <a href="#how-it-works" className="hover:text-white transition-colors">How it works</a>
-            <a href="#trend" className="hover:text-white transition-colors">Explore the trend</a>
-            <a href="#benefits" className="hover:text-white transition-colors">Why AI</a>
-            <a href="#photo-tips" className="hover:text-white transition-colors">Photo Tips</a>
-            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
-            <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
+          {/* Centered Navigation */}
+          <nav className="hidden lg:flex items-center gap-7 xl:gap-9 text-[15px] font-medium text-[#b3bec4] absolute left-1/2 -translate-x-1/2">
+            <a href="#create" className="hover:text-white transition-colors py-1">Create</a>
+            <a href="#how-it-works" className="hover:text-white transition-colors py-1">How it works</a>
+            <a href="#trend" className="hover:text-white transition-colors py-1">Explore the trend</a>
+            <a href="#photo-tips" className="hover:text-white transition-colors py-1">Photo Tips</a>
+            <a href="#pricing" className="hover:text-white transition-colors py-1">Pricing</a>
+            <a href="#faq" className="hover:text-white transition-colors py-1">FAQ</a>
           </nav>
-          <button
-            onClick={() => {
-              setReservedPack(undefined);
-              setShowWaitlistModal(true);
-              trackEvent('click_nav_waitlist_btn');
-            }}
-            className="v-btn-primary px-4 py-2 text-xs sm:text-sm shadow-md"
-          >
-            <span>Get Started</span>
-          </button>
+
+          {/* Right Action Button */}
+          <div className="flex items-center gap-4 shrink-0">
+            <button
+              onClick={() => {
+                setReservedPack(undefined);
+                setShowWaitlistModal(true);
+                trackEvent('click_nav_waitlist_btn');
+              }}
+              className="v-btn-primary px-4 sm:px-5 py-2 text-[14px] font-bold shadow-sm"
+            >
+              <span>Get Started</span>
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* 2. Hero Section & Double-Column Workspace */}
-      <section className="max-w-[1200px] mx-auto px-6 pt-12 pb-16 w-full">
-        {/* Centered Hero Heading */}
-        <div className="text-center max-w-3xl mx-auto">
-          <h1 className="text-3xl sm:text-5xl lg:text-[54px] font-bold tracking-tight text-white leading-[1.14]">
+      {/* 2. Hero Section & Workspace */}
+      <section className="max-w-[1240px] mx-auto px-6 pt-12 pb-16 w-full">
+        {/* Centered Hero Heading: Single Line on PC, 2-line Subtitle */}
+        <div className="text-center max-w-4xl mx-auto">
+          <h1 className="text-3xl sm:text-4xl md:text-[38px] lg:text-[46px] xl:text-[52px] font-bold tracking-tight text-white leading-tight md:whitespace-nowrap">
             Hit The Road Dude AI <span className="text-[#ff5a3d]">Video Generator</span>
           </h1>
-          <p className="text-base sm:text-lg text-[#b3bec4] mt-4 leading-relaxed max-w-2xl mx-auto">
+
+          <p className="max-w-[820px] mx-auto text-base sm:text-[17px] text-[#b3bec4] mt-3.5 leading-[1.65]">
             Take the driver's seat in the “Hit the road, dude” meme. One photo, a white pickup and that skeptical “State?” reaction — in an 11-second, 9:16 vertical video. No truck, filming or prompt to write.
           </p>
         </div>
 
         {/* Workspace Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start mt-10 max-w-5xl mx-auto">
-          {/* Left Column: Showcase Reel Player (7 cols) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start mt-10 max-w-5xl mx-auto">
+          {/* Left Column: High-End 3D Reel Carousel (7 cols) */}
           <div className="lg:col-span-7 flex flex-col" id="examples">
-            <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#8e9a9f] px-1 mb-3">
+            <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#8e9a9f] px-2 mb-3">
               <span className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#ff5a3d]" />
                 Meme Remix Examples
@@ -129,56 +168,133 @@ export default function HomePage() {
               <span>3 Video Previews</span>
             </div>
 
-            <div className="relative aspect-[9/16] max-h-[500px] w-full max-w-[310px] mx-auto rounded-2xl overflow-hidden bg-black border border-[#2b3437] shadow-2xl group">
-              <video
-                key={siteConfig.examples[activeExampleIndex].videoUrl}
-                src={siteConfig.examples[activeExampleIndex].videoUrl}
-                poster={siteConfig.examples[activeExampleIndex].posterUrl}
-                autoPlay
-                muted={isMuted}
-                controls
-                playsInline
-                loop
-                className="w-full h-full object-cover"
-              />
-
-              {/* Status Chip */}
-              <div className="absolute top-3.5 left-3.5 z-10 bg-black/70 backdrop-blur px-2.5 py-1 rounded-full border border-white/10 text-[10px] text-white/90 font-mono">
-                11s · 9:16 vertical
-              </div>
-
-              {/* Audio Toggle Floating Pill */}
+            {/* 3D Layered Reel Container */}
+            <div className="v-carousel">
+              {/* Prev Navigation Arrow */}
               <button
-                onClick={() => {
-                  const nextMuted = !isMuted;
-                  setIsMuted(nextMuted);
-                  trackEvent('click_toggle_mute', { muted: nextMuted });
-                }}
-                className="absolute bottom-3.5 right-3.5 bg-black/75 hover:bg-black/90 backdrop-blur text-white text-xs px-3 py-1.5 rounded-full border border-white/20 flex items-center gap-1.5 transition z-10 shadow-lg"
-                title={isMuted ? "Click to enable sound" : "Mute sound"}
+                type="button"
+                onClick={handlePrevExample}
+                className="v-carousel-arrow prev"
+                aria-label="Previous example"
               >
-                {isMuted ? "🔇 Unmute Audio" : "🔊 Sound ON"}
+                <ChevronLeft className="w-5 h-5 text-white" />
+              </button>
+
+              {/* Render 3 Reels with 3D Positioning */}
+              {siteConfig.examples.map((ex, idx) => {
+                const isCurrent = idx === activeExampleIndex;
+                const isLeft = idx === (activeExampleIndex - 1 + totalExamples) % totalExamples;
+                const isRight = idx === (activeExampleIndex + 1) % totalExamples;
+
+                let reelClass = 'v-reel';
+                if (isCurrent) reelClass += ' is-active';
+                else if (isLeft) reelClass += ' is-left';
+                else if (isRight) reelClass += ' is-right';
+
+                return (
+                  <div
+                    key={ex.id}
+                    className={reelClass}
+                    onClick={() => {
+                      if (!isCurrent) {
+                        setActiveExampleIndex(idx);
+                        trackEvent('click_switch_example', { exampleId: ex.id, title: ex.title, index: idx });
+                      }
+                    }}
+                  >
+                    {isCurrent ? (
+                      <div className="relative w-full h-full bg-black">
+                        <video
+                          key={ex.videoUrl}
+                          src={ex.videoUrl}
+                          poster={ex.posterUrl}
+                          autoPlay
+                          muted={isMuted}
+                          controls
+                          playsInline
+                          loop
+                          className="w-full h-full object-cover"
+                        />
+                        {/* Top Overlay */}
+                        <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10 pointer-events-none">
+                          <span className="bg-black/70 backdrop-blur px-2.5 py-0.5 rounded-full border border-white/10 text-[10px] text-white/90 font-mono">
+                            11s · 9:16
+                          </span>
+                          <span className="text-white/70 p-1">
+                            <Expand className="w-3.5 h-3.5" />
+                          </span>
+                        </div>
+                        {/* Standardized Enterprise Sound Toggle */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const nextMuted = !isMuted;
+                            setIsMuted(nextMuted);
+                            trackEvent('click_toggle_mute', { muted: nextMuted });
+                          }}
+                          className="v-reel-sound"
+                          title={isMuted ? "Unmute audio" : "Mute audio"}
+                          aria-label={isMuted ? "Unmute audio" : "Mute audio"}
+                        >
+                          {isMuted ? (
+                            <VolumeX className="w-4 h-4 text-white" />
+                          ) : (
+                            <Volume2 className="w-4 h-4 text-[#ff5a3d]" />
+                          )}
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="relative w-full h-full bg-black">
+                        <img
+                          src={ex.posterUrl}
+                          alt={ex.title}
+                          className="w-full h-full object-cover brightness-90"
+                        />
+                        <div className="absolute inset-0 bg-black/30 hover:bg-black/10 transition-colors" />
+                        <div className="absolute top-3 left-3 bg-black/60 backdrop-blur px-2 py-0.5 rounded-full text-[10px] text-white/80">
+                          {ex.title}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              {/* Next Navigation Arrow */}
+              <button
+                type="button"
+                onClick={handleNextExample}
+                className="v-carousel-arrow next"
+                aria-label="Next example"
+              >
+                <ChevronRight className="w-5 h-5 text-white" />
               </button>
             </div>
 
-            {/* Carousel Tabs */}
-            <div className="flex justify-center gap-2 mt-4">
-              {siteConfig.examples.map((ex, idx) => (
-                <button
-                  key={ex.id}
-                  onClick={() => {
-                    setActiveExampleIndex(idx);
-                    trackEvent('click_switch_example', { exampleId: ex.id, title: ex.title, index: idx });
-                  }}
-                  className={`text-xs px-3.5 py-1.5 rounded-full border transition-all duration-200 ${
-                    activeExampleIndex === idx
-                      ? 'border-[#ff5a3d] bg-[#ff5a3d]/10 text-[#ff9a7f] font-semibold'
-                      : 'border-[#2b3437] bg-[#111618] text-[#8e9a9f] hover:text-white hover:border-[#394246]'
-                  }`}
-                >
-                  {ex.title}
-                </button>
-              ))}
+            {/* Carousel Bottom Indicator */}
+            <div className="flex flex-col items-center gap-2 mt-4">
+              <span className="text-xs font-semibold text-white">
+                {siteConfig.examples[activeExampleIndex].title}
+              </span>
+              <div className="v-dots">
+                {siteConfig.examples.map((_, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      setActiveExampleIndex(idx);
+                      trackEvent('click_switch_example', {
+                        exampleId: siteConfig.examples[idx].id,
+                        title: siteConfig.examples[idx].title,
+                        index: idx,
+                      });
+                    }}
+                    className={`v-dot ${activeExampleIndex === idx ? 'active' : ''}`}
+                    aria-label={`Go to slide ${idx + 1}`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
 
@@ -217,13 +333,7 @@ export default function HomePage() {
               ) : (
                 <label className="cursor-pointer flex flex-col items-center w-full h-full justify-center">
                   <div className="w-11 h-11 rounded-xl bg-[#2c201d] border border-[#51342b] flex items-center justify-center text-[#ff9a7f] mb-2 group-hover:scale-105 transition-transform">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M16 5h6" />
-                      <path d="M19 2v6" />
-                      <path d="M21 11.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7.5" />
-                      <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                      <circle cx="9" cy="9" r="2" />
-                    </svg>
+                    <ImagePlus className="w-5 h-5 text-[#ff9a7f]" strokeWidth={1.75} />
                   </div>
                   <strong className="text-sm font-semibold text-white group-hover:text-[#ff9a7f] transition">
                     Drop your photo here
@@ -269,7 +379,7 @@ export default function HomePage() {
               className="v-btn-primary w-full py-3.5 text-base shadow-lg"
             >
               <span>Create my video</span>
-              <span>→</span>
+              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -410,8 +520,9 @@ export default function HomePage() {
                 alt="Ideal portrait for Hit The Road Dude AI generation"
                 className="w-full h-auto object-cover"
               />
-              <div className="absolute top-3 left-3 bg-emerald-500/90 text-white text-xs font-bold px-3 py-1 rounded-full shadow">
-                ✓ Ideal Framing & Lighting
+              <div className="absolute top-3 left-3 bg-emerald-500/90 text-white text-xs font-bold px-3 py-1 rounded-full shadow flex items-center gap-1">
+                <Check className="w-3.5 h-3.5" />
+                <span>Ideal Framing & Lighting</span>
               </div>
             </div>
           </div>
@@ -445,7 +556,8 @@ export default function HomePage() {
               onClick={scrollToCreate}
               className="v-btn-primary w-fit px-5 py-2.5 text-xs font-bold mt-2"
             >
-              Upload your photo ↑
+              <span>Upload your photo</span>
+              <span>↑</span>
             </button>
           </div>
         </div>
@@ -590,10 +702,10 @@ export default function HomePage() {
         <p className="text-sm text-[#8e9a9f] mb-6">One photo · No prompt required · 60s Fast GPU</p>
         <button
           onClick={scrollToCreate}
-          className="v-btn-primary px-8 py-3 text-base shadow-xl"
+          className="v-btn-primary px-8 py-3.5 text-base shadow-xl"
         >
           <span>Upload your photo</span>
-          <span>→</span>
+          <ArrowRight className="w-4 h-4" />
         </button>
       </section>
 
