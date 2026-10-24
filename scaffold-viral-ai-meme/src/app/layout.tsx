@@ -117,7 +117,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
       </head>
-      <body className="min-h-screen bg-[#090b0c] text-white flex flex-col antialiased">
+      <body className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col antialiased selection:bg-sky-500/30 selection:text-sky-200">
         <AnalyticsProvider>
           <Toaster richColors position="top-center" theme="dark" closeButton />
           {children}

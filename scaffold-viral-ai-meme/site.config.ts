@@ -50,11 +50,11 @@ export interface MemeConfig {
 export const siteConfig: MemeConfig = {
   name: "Hit The Road Dude AI",
   slug: "hit-the-road-dude",
-  domain: "hittheroaddude.org",
+  domain: "hittheroaddude.space",
   title: "Hit The Road Dude AI Video Generator – The Private Property Meme",
-  description: "Create a Hit The Road Dude AI video from one photo: a 11-second 9:16 vertical remix with no prompt or editing. Choose a one-time video pack with no subscription.",
+  description: "Create a Hit The Road Dude AI video from one photo. 11-sec 9:16 vertical remix with instant lip-sync. Choose one-time video packs with zero subscription.",
   ogImage: "/og-image.jpg",
-  themeColor: "#090b0c",
+  themeColor: "#090d16",
 
   memeOriginalTitle: "The Private Property Meme",
   heroTagline: "Take the driver's seat in the “Hit the road, dude” meme.",
@@ -132,8 +132,20 @@ export const siteConfig: MemeConfig = {
       answer: "Browsing meme examples and guides is free. Generation requires one-time video packs: $6.99 for 1 video, $16.99 for 3 videos, $24.99 for 5 videos. There is no recurring monthly subscription.",
     },
     {
+      question: "Can I make the cat or dog version shown in the examples?",
+      answer: "Yes! The AI generation engine supports both human portraits and pets (dogs, cats). Simply upload a well-lit, front-facing photo of your pet's face.",
+    },
+    {
+      question: "Will the video use the original voice and exact lip sync?",
+      answer: "Yes. Every generated video automatically syncs the facial expressions and lip movements with the iconic “State? This? State? Hit the road, dude” dialogue and audio track.",
+    },
+    {
+      question: "How long does a render take?",
+      answer: "A render typically takes between 60 to 120 seconds depending on server load. You can preview and download the finished high-resolution 9:16 vertical video immediately.",
+    },
+    {
       question: "What happens if generation fails?",
-      answer: "If generation fails, that video credit automatically returns to your account balance so you can retry without extra charge.",
+      answer: "If generation fails, that video credit automatically returns to your account balance so you can retry with another photo without extra charge.",
     },
   ],
 

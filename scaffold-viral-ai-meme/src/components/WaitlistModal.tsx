@@ -68,7 +68,7 @@ export default function WaitlistModal({ isOpen, onClose, reservedPack }: Waitlis
       const data = await res.json();
       if (data.ok) {
         setIsSuccess(true);
-        toast.success('You have been added to the waitlist!', {
+        toast.success('You have been added to the priority waitlist!', {
           description: 'We will notify you first with 3 free video credits upon launch.',
         });
       } else {
@@ -86,16 +86,19 @@ export default function WaitlistModal({ isOpen, onClose, reservedPack }: Waitlis
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
       {/* Backdrop */}
       <div className="fixed inset-0" onClick={onClose} />
 
       {/* Modal Card */}
-      <div className="relative w-full max-w-md bg-[#121517] border border-white/15 rounded-3xl p-6 sm:p-8 shadow-2xl z-10 flex flex-col items-center text-center">
+      <div className="relative w-full max-w-md bg-[#0c1220]/95 border border-white/15 rounded-3xl p-6 sm:p-8 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_50px_rgba(56,189,248,0.15)] z-10 flex flex-col items-center text-center backdrop-blur-2xl">
+        {/* Subtle top ambient glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-sky-400 to-transparent blur-sm rounded-full pointer-events-none" />
+
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-neutral-400 hover:text-white p-2 rounded-full hover:bg-white/5 transition"
+          className="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-full hover:bg-white/10 transition"
           aria-label="Close dialog"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,21 +110,21 @@ export default function WaitlistModal({ isOpen, onClose, reservedPack }: Waitlis
 
         {isSuccess ? (
           <div className="flex flex-col items-center gap-3 mt-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <div className="w-14 h-14 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl font-bold border border-emerald-500/30">
+            <div className="w-14 h-14 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl font-bold border border-emerald-500/30 shadow-[0_0_20px_rgba(34,197,94,0.3)]">
               ✓
             </div>
             <h3 className="text-2xl font-black text-white">You're On The Priority List!</h3>
-            <p className="text-xs text-neutral-400 leading-relaxed max-w-xs">
-              We've registered <strong className="text-amber-300">{email}</strong> for early access.
+            <p className="text-xs text-slate-400 leading-relaxed max-w-xs">
+              We've registered <strong className="text-sky-300">{email}</strong> for early access.
             </p>
 
             {/* Clear Next Steps Explanation */}
-            <div className="w-full mt-2 p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 text-left flex flex-col gap-2 text-xs text-neutral-300">
-              <div className="flex items-start gap-2">
-                <span className="text-emerald-400 font-bold">📬</span>
-                <span><strong>Next step:</strong> We will email your private activation link and <strong className="text-amber-300">3 free video credits</strong> as soon as your server batch is ready.</span>
+            <div className="w-full mt-2 p-3.5 rounded-2xl bg-slate-900/60 border border-white/10 text-left flex flex-col gap-2.5 text-xs text-slate-300">
+              <div className="flex items-start gap-2.5">
+                <span className="text-sky-400 font-bold">📬</span>
+                <span><strong>Next step:</strong> We will email your private activation link and <strong className="text-sky-300">3 free video credits</strong> as soon as your batch is ready.</span>
               </div>
-              <div className="flex items-start gap-2">
+              <div className="flex items-start gap-2.5">
                 <span className="text-amber-400 font-bold">⏱</span>
                 <span><strong>Estimated time:</strong> We roll out slots in batches every 24–48 hours. Check your inbox (or promotions tab)!</span>
               </div>
@@ -129,7 +132,7 @@ export default function WaitlistModal({ isOpen, onClose, reservedPack }: Waitlis
 
             <button
               onClick={onClose}
-              className="mt-4 px-6 py-2.5 rounded-full bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs transition"
+              className="mt-4 px-6 py-2.5 rounded-full bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs transition shadow-lg shadow-sky-500/25"
             >
               Done & Return
             </button>
@@ -137,33 +140,34 @@ export default function WaitlistModal({ isOpen, onClose, reservedPack }: Waitlis
         ) : (
           <>
             <div className="mt-4">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/20">
-                🚀 EARLY ACCESS QUEUE
+              <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400 bg-sky-500/10 px-3 py-1 rounded-full border border-sky-500/30 shadow-[0_0_12px_rgba(56,189,248,0.15)] inline-flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
+                EARLY ACCESS QUEUE
               </span>
-              <h2 className="text-2xl font-black tracking-tight text-white mt-3">
+              <h2 className="text-2xl font-black tracking-tight text-white mt-3 bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text">
                 Join the Priority Waitlist
               </h2>
               {reservedPack && (
-                <div className="mt-2 text-xs font-semibold text-amber-300 bg-amber-400/10 px-3 py-1 rounded-xl border border-amber-400/20 inline-block">
-                  Reserved Tier: {reservedPack.toUpperCase()} Pack
+                <div className="mt-2 text-xs font-semibold text-sky-300 bg-sky-500/10 px-3 py-1 rounded-xl border border-sky-500/30 inline-block shadow-sm">
+                  Reserved Tier: {reservedPack.toUpperCase()}
                 </div>
               )}
-              <p className="text-xs text-neutral-400 mt-2 leading-relaxed">
+              <p className="text-xs text-slate-400 mt-2 leading-relaxed">
                 Be the first to turn your photos into viral “Hit the road, dude” AI videos.
               </p>
             </div>
 
             {/* Purpose & Value Proposition Box */}
-            <div className="w-full mt-4 p-3 rounded-2xl bg-white/[0.03] border border-white/5 text-left flex flex-col gap-2 text-[11px] text-neutral-300">
+            <div className="w-full mt-4 p-3.5 rounded-2xl bg-slate-900/60 border border-white/10 text-left flex flex-col gap-2.5 text-[11px] text-slate-300">
               <div className="flex items-start gap-2">
-                <span className="text-amber-400 font-bold">•</span>
+                <span className="text-sky-400 font-bold">•</span>
                 <span><strong>Why waitlist?</strong> To prevent GPU overload and ensure ultra-fast 60s rendering, we onboard creators in controlled batches.</span>
               </div>
               <div className="flex items-start gap-2">
-                <span className="text-amber-400 font-bold">•</span>
-                <span><strong>How we contact you:</strong> We'll email your private invite link with <strong className="text-amber-300">3 free video credits</strong> when your turn opens.</span>
+                <span className="text-sky-400 font-bold">•</span>
+                <span><strong>How we contact you:</strong> We'll email your private invite link with <strong className="text-sky-300">3 free video credits</strong> when your slot opens.</span>
               </div>
-              <div className="flex items-start gap-2 text-neutral-400">
+              <div className="flex items-start gap-2 text-slate-400">
                 <span className="text-emerald-400 font-bold">✓</span>
                 <span>100% spam-free. We only email you when your generation slot is live.</span>
               </div>
@@ -177,22 +181,22 @@ export default function WaitlistModal({ isOpen, onClose, reservedPack }: Waitlis
                   placeholder="Enter your email address..."
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3.5 rounded-2xl bg-white/5 border border-white/15 focus:border-amber-400 text-white placeholder-neutral-500 text-sm outline-none transition"
+                  className="w-full px-4 py-3.5 rounded-2xl bg-slate-900/80 border border-white/15 focus:border-sky-400 focus:ring-1 focus:ring-sky-400/50 text-white placeholder-slate-500 text-sm outline-none transition"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-sm transition shadow-lg shadow-amber-500/20 disabled:opacity-50 active:scale-[0.99]"
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-600 hover:from-sky-400 hover:via-indigo-400 hover:to-purple-500 text-white font-extrabold text-sm transition shadow-[0_0_25px_rgba(56,189,248,0.35)] hover:shadow-[0_0_35px_rgba(56,189,248,0.55)] disabled:opacity-50 active:scale-[0.99]"
               >
                 {isSubmitting ? 'Securing your spot...' : 'Claim Early Access & 3 Free Credits →'}
               </button>
             </form>
 
             {/* Social Proof */}
-            <div className="mt-4 flex items-center gap-2 text-[11px] text-neutral-500">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <div className="mt-4 flex items-center gap-2 text-[11px] text-slate-400">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
               <span>
                 {waitlistCount && waitlistCount > 0
                   ? `${waitlistCount + 128} creators waiting in queue`
