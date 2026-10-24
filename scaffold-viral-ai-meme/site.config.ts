@@ -54,7 +54,7 @@ export const siteConfig: MemeConfig = {
   title: "Hit The Road Dude AI Video Generator – The Private Property Meme",
   description: "Create a Hit The Road Dude AI video from one photo. 11-sec 9:16 vertical remix with instant lip-sync. Choose one-time video packs with zero subscription.",
   ogImage: "/og-image.jpg",
-  themeColor: "#090d16",
+  themeColor: "#090b0c",
 
   memeOriginalTitle: "The Private Property Meme",
   heroTagline: "Take the driver's seat in the “Hit the road, dude” meme.",

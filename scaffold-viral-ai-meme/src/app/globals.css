@@ -3,54 +3,89 @@
 @tailwind utilities;
 
 :root {
-  --bg-main: #090d16;
-  --bg-card: rgba(17, 24, 39, 0.75);
-  --bg-card-hover: rgba(30, 41, 59, 0.85);
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --accent-cyan: #38bdf8;
-  --accent-indigo: #818cf8;
-  --accent-purple: #a855f7;
-  --accent-emerald: #22c55e;
-  --accent-amber: #f59e0b;
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-glow: rgba(56, 189, 248, 0.3);
+  --background: #090b0c;
+  --foreground: #f5f6f6;
+  --card: #111416;
+  --card-foreground: #f5f6f6;
+  --panel: #171b1e;
+  --panel-border: #394246;
+  --secondary: #1b2022;
+  --muted: #171b1d;
+  --muted-foreground: #b3bec4;
+  --border: #2a3134;
+  --copy: #c8d1d6;
+  --brand-primary: #ff5a3d;
+  --brand-primary-hover: #ff8068;
+  --brand-dark: #21100b;
 }
 
 body {
-  color: var(--text-main);
-  background-color: var(--bg-main);
+  color: var(--foreground);
+  background-color: var(--background);
   background-image: 
-    radial-gradient(ellipse 90% 60% at 50% -15%, rgba(56, 189, 248, 0.12), transparent 75%),
-    radial-gradient(ellipse 50% 40% at 95% 20%, rgba(129, 140, 248, 0.08), transparent 60%),
-    radial-gradient(ellipse 50% 40% at 5% 65%, rgba(56, 189, 248, 0.06), transparent 60%);
+    radial-gradient(ellipse 70% 45% at 50% 20%, rgba(64, 32, 23, 0.16), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 85% 60%, rgba(255, 90, 61, 0.04), transparent 60%);
   background-attachment: fixed;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Glassmorphism primitives */
-.glass-panel {
-  background: rgba(17, 24, 39, 0.72);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+/* Professional Card & Panel Standards */
+.v-panel {
+  background: linear-gradient(145deg, #1d2224, #171b1e);
+  border: 1px solid #394246;
+  border-radius: 14px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
 }
 
-.glass-panel-interactive {
-  background: rgba(17, 24, 39, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+.v-card {
+  background: #111618;
+  border: 1px solid #2b3437;
+  border-radius: 12px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
-.glass-panel-interactive:hover {
-  background: rgba(22, 30, 49, 0.85);
-  border-color: rgba(56, 189, 248, 0.35);
-  box-shadow: 0 12px 35px -10px rgba(56, 189, 248, 0.15), 0 0 1px 1px rgba(56, 189, 248, 0.2);
-  transform: translateY(-2px);
+.v-card:hover {
+  border-color: #3f4e54;
+}
+
+.v-card-featured {
+  background: linear-gradient(155deg, rgba(72, 37, 27, 0.45), #111618 60%);
+  border: 1px solid #e27357;
+  border-radius: 12px;
+}
+
+/* Primary Button with authentic high-contrast branding */
+.v-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  background-color: #ff5a3d;
+  color: #21100b !important;
+  font-weight: 700;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.v-btn-primary:hover {
+  background-color: #ff8068;
+  transform: translateY(-1px);
+}
+
+/* Upload Dropzone styling */
+.v-upload-zone {
+  border: 1px dashed #3c484c;
+  border-radius: 10px;
+  background: radial-gradient(ellipse, rgba(64, 32, 24, 0.2), transparent);
+  transition: all 0.2s ease;
+}
+
+.v-upload-zone:hover {
+  border-color: #ff5a3d;
+  background-color: rgba(255, 90, 61, 0.04);
 }
 
 /* Custom Scrollbar */
@@ -60,14 +95,14 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #090d16;
+  background: #090b0c;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: #2a3134;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(56, 189, 248, 0.35);
+  background: #3c484c;
 }
